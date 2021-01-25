@@ -21,7 +21,6 @@ Original images provided by the [Stanford Dogs Dataset](http://vision.stanford.e
 # Remove spaces from filenames
 find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
-# Make extensions lowercase
-brew install rename;
-rename JPG jpg *.JPG;
+# Find uppercase
+find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 ```
