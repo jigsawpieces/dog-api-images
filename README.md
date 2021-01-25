@@ -16,3 +16,12 @@ All images you submit will be made available via the [Dog API endpoints](https:/
 
 
 Original images provided by the [Stanford Dogs Dataset](http://vision.stanford.edu/aditya86/ImageNetDogs/).
+
+```
+# Remove spaces from filenames
+find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
+
+# Make extensions lowercase
+brew install rename;
+rename JPG jpg *.JPG;
+```
