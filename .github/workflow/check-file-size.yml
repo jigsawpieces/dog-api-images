@@ -7,6 +7,9 @@ jobs:
     name: ActionsDesk/lfs-warning
     steps:
       - name: Checkout Repo
+        uses: actions/checkout@v2
+        
+      - name: Check file sizes
         uses: actionsdesk/lfs-warning@v2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
