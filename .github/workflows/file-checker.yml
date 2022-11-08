@@ -30,7 +30,7 @@ jobs:
 
       # Fail if any files are found
       - name: How big is the file?
-          find ./ -type f -size +1024k | grep .
+        run: find ./ -type f -size +1024k | grep .
 
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
