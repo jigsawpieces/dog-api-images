@@ -23,9 +23,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: 
-        run: sudo apt install jpegoptim
-
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
@@ -55,7 +52,5 @@ jobs:
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix bad files"
-            git config pull.rebase true
-            git pull origin ${GITHUB_HEAD_REF}
-            git push origin HEAD:${GITHUB_HEAD_REF}
+            git push
           fi
