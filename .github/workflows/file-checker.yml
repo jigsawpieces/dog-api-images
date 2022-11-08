@@ -39,8 +39,14 @@ jobs:
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
+      - name: Find uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
+
       - name: Find uppercase and rename to lowercase
         run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
+
+      - name: Find uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
       # Todo: resize images in command line
 
