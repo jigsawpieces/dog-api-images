@@ -29,7 +29,7 @@ jobs:
           sudo apt install -y jpegoptim
 
       - name: Bring resolution down to 1080x1080, 90% qual
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 90% {} \;
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
       - name: List files that are too large
