@@ -1,0 +1,52 @@
+name: Auto resize
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Switch to whatever branch we are on
+      - name: get current branch
+        run: |
+          git config pull.rebase true
+          git pull origin ${GITHUB_HEAD_REF}
+
+      - name: Install jpegoptim
+        run: |
+          sudo apt update
+          sudo apt install -y jpegoptim
+
+      - name: Bring resolution down to 1080x1080, 90% qual
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 90% {} \;
+
+      - name: Run through jpegoptim, try to aim for 300k
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec jpegoptim -t --all-progressive --strip-all --size=300k {} \;
+
+      # Twice, once to actually output the list, second time to output non zero and break CI
+      - name: List files that are too large
+        run: |
+         find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
+         find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
+
+      # If no files were too big, commit
+      - name: Commit report
+        run: |
+          git config --global user.name 'ElliottLandsborough'
+          git config --global user.email '1583854+ElliottLandsborough@users.noreply.github.com'
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Fix bad files"
+            git push origin HEAD:${GITHUB_HEAD_REF}
+          fi
