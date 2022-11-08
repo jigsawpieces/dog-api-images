@@ -50,14 +50,6 @@ jobs:
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
-      #- name: Install jpegoptim
-      #  run: |
-      #    sudo apt update
-      #    sudo apt install -y jpegoptim
-
-      #- name: Find images above 800 x 800
-      #  run: find . -regex ".*\.\(jpg\|jpeg\)" -type f -exec identify -format 'Too big; %i\n' '{}' \; | awk '$1>2048 || $2>2048'
-
       - name: Commit report
         run: |
           git config --global user.name 'ElliottLandsborough'
