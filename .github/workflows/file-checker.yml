@@ -1,0 +1,16 @@
+on: 
+  workflow_dispatch:
+  
+name: Scrape File
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out current commit
+     
+      - name: List all files
+        run: la -alh ./
+
+
