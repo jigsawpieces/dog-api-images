@@ -58,6 +58,13 @@ jobs:
       - name: Commit report
         run: |
           git config --global user.name 'Dogbot'
-          git config --global user.email 'ElliottLandsborough@users.noreply.github.com'
+          git config --global user.email 'noreply@dog.ceo'
           git add -A && git commit -m "Fix files"
-          git push origin HEAD:<name-of-remote-branch>
+          git checkout -b ${GITHUB_HEAD_REF}
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Fix bad files"
+            git config pull.rebase true
+            git pull origin ${GITHUB_HEAD_REF}
+            git push origin HEAD:${GITHUB_HEAD_REF}
+          fi
