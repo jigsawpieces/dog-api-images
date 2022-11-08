@@ -28,6 +28,10 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
+      # Fail if any files are found
+      - name: How big is the file?
+          find ./ -type f -size +1024k | grep .
+
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
