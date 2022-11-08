@@ -52,5 +52,5 @@ jobs:
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix bad files"
-            git push
+            git push origin HEAD:${GITHUB_HEAD_REF}
           fi
