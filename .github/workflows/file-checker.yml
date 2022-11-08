@@ -22,6 +22,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
+      - uses: git pull origin ${GITHUB_HEAD_REF}
 
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
@@ -40,10 +41,12 @@ jobs:
           sudo apt update
           sudo apt install -y jpegoptim
 
-      # The grep inverts the status, so we get a fail if any files are found
-      - name: Find files larger than 300KB
-        #run: find ./ -type f -size +300k | grep .
-        run: find ./ -type f -size +300k
+      #- name: Find files larger than 300KB
+        #find jpegs above 300kb
+        #run: find ./ -name "*.jpg" -type f -size +300k
+        #run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +300k -exec jpegoptim -t --strip-all --size=250k {} \;
+
+
 
       - name: Commit report
         run: |
