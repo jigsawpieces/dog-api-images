@@ -50,8 +50,8 @@ jobs:
 
       - name: Commit report
         run: |
-          git config --global user.name 'Dogbot'
-          git config --global user.email 'noreply@dog.ceo'
+          git config --global user.name 'ElliottLandsborough'
+          git config --global user.email '1583854+ElliottLandsborough@users.noreply.github.com'
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix bad files"
