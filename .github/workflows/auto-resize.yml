@@ -31,9 +31,6 @@ jobs:
       - name: Bring resolution down to 1080x1080, 90% qual
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 90% {} \;
 
-      - name: Run through jpegoptim
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +400k -exec jpegoptim -t --all-progressive --strip-all {} \;
-
       # Twice, once to actually output the list, second time to output non zero and break CI
       - name: List files that are too large
         run: |
