@@ -36,17 +36,13 @@ jobs:
       - name: Find uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
-      - name: Install jpegoptim
-        run: |
-          sudo apt update
-          sudo apt install -y jpegoptim
+      #- name: Install jpegoptim
+      #  run: |
+      #    sudo apt update
+      #    sudo apt install -y jpegoptim
 
-      #- name: Find files larger than 300KB
-        #find jpegs above 300kb
-        #run: find ./ -name "*.jpg" -type f -size +300k
-        #run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +300k -exec jpegoptim -t --strip-all --size=250k {} \;
-
-
+      #- name: Find images above 800 x 800
+      #  run: find . -regex ".*\.\(jpg\|jpeg\)" -type f -exec identify -format 'Too big; %i\n' '{}' \; | awk '$1>2048 || $2>2048'
 
       - name: Commit report
         run: |
