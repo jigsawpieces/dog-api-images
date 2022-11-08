@@ -54,3 +54,10 @@ jobs:
       - name: Find files larger than 300KB
         #run: find ./ -type f -size +300k | grep .
         run: find ./ -type f -size +300k
+
+      - name: Commit report
+        run: |
+          git config --global user.name 'Dogbot'
+          git config --global user.email 'ElliottLandsborough@users.noreply.github.com'
+          git commit -am "Fix bad files"
+          git push
