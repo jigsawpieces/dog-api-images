@@ -30,8 +30,8 @@ jobs:
 
       - name: List files that are too large
         run: |
-         find ./ -type f -size +500k
-         find ./ -type f -size +500k -exec false {} +
+         find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
+         find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
 
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
