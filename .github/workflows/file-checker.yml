@@ -23,18 +23,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      #- name: Run a one-line script
-      #  run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      #- name: Run a multi-line script
-      #  run: |
-      #    echo Add other actions to build,
-      #    echo test, and deploy your project.
-
-      #- name: List all files
-      #  run: ls -alh ./
+      - name: 
+        run: sudo apt install jpegoptim
 
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
@@ -48,7 +38,10 @@ jobs:
       - name: Find uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
-      # Todo: resize images in command line
+      - name: Install jpegoptim
+        run: |
+          sudo apt update
+          sudo apt install -y jpegoptim
 
       # The grep inverts the status, so we get a fail if any files are found
       - name: Find files larger than 300KB
