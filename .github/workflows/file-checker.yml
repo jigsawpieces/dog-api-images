@@ -29,7 +29,7 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
-      - name: Bring resolution down to 1080x1080, 90% qual on files over 500K big
+      - name: Bring resolution down to 1080x1080, 80% qual on files over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
