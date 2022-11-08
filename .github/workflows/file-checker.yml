@@ -59,7 +59,6 @@ jobs:
         run: |
           git config --global user.name 'Dogbot'
           git config --global user.email 'noreply@dog.ceo'
-          git add -A && git commit -m "Fix files"
           git checkout -b ${GITHUB_HEAD_REF}
           if [[ $(git status -s) ]]; then
             git add -A
