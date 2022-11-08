@@ -42,6 +42,9 @@ jobs:
       - name: Find uppercase and rename to lowercase
         run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
 
-      
+      # Todo: resize images in command line
 
-      # Todo: resize images in command line?
+      # The grep inverts the status, so we get a fail if any files are found
+      - name: Find files larger than 300KB
+        #run: find ./ -type f -size +300k | grep .
+        run: find ./ -type f -size +300k
