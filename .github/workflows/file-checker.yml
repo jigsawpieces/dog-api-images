@@ -34,4 +34,14 @@ jobs:
           echo test, and deploy your project.
 
       - name: List all files
-        run: la -alh ./
+        run: ls -alh ./
+
+      - name: Remove spaces from filenames
+        run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
+
+      - name: Find uppercase and rename to lowercase
+        run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
+
+      
+
+      # Todo: resize images in command line?
