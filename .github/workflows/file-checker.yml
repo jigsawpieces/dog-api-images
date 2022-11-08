@@ -23,11 +23,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      # Switch to whatever branch we are on
       - name: get current branch
         run: |
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
+      # Twice, once to actually output the list, second time to output non zero and break CI
       - name: List files that are too large
         run: |
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
@@ -36,13 +38,13 @@ jobs:
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
-      - name: Find uppercase files
+      - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
       - name: Find uppercase and rename to lowercase
         run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
 
-      - name: Find uppercase files
+      - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
       #- name: Install jpegoptim
