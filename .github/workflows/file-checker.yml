@@ -23,6 +23,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: Install jpegoptim
+        run: |
+          sudo apt update
+          sudo apt install -y jpegoptim
+
       - name: configure git
         run: |
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
@@ -33,6 +38,9 @@ jobs:
         run: |
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
+
+      - name: Run through jpegoptim
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec jpegoptim -t --all-progressive --strip-all {} \;
 
       - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
