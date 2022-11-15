@@ -39,8 +39,9 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
+      # Get folder size down from 1.9Gb to 1.8Gb
       - name: Run through jpegoptim
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec jpegoptim -t --all-progressive --strip-all {} \;
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
       - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
@@ -68,7 +69,7 @@ jobs:
         run: |
           if [[ $(git status -s) ]]; then
             git add -A
-            git commit -m "Fix bad files"
+            git commit -m "Optimize images"
             if [ -z "${GITHUB_HEAD_REF}" ]
             then
               echo "\${GITHUB_HEAD_REF} is empty"
