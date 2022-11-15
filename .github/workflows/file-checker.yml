@@ -31,11 +31,11 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
-      - name: Bring resolution down to 1080x1080, 80% qual on files over 500K big
+      - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
-      - name: List files that are too large
+      - name: List jpg/jpeg files that are too large
         run: |
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
@@ -46,7 +46,7 @@ jobs:
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
-      - name: Find uppercase and rename to lowercase
+      - name: Find uppercase 'JPG' and rename to lowercase 'jpg'
         run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
 
       - name: Display a list of uppercase files
