@@ -60,5 +60,11 @@ jobs:
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix bad files"
-            git push origin HEAD:${GITHUB_HEAD_REF}
+            if [ -z "${GITHUB_HEAD_REF}" ]
+            then
+              echo "\${GITHUB_HEAD_REF} is empty"
+            else
+              echo "\${GITHUB_HEAD_REF} is NOT empty"
+            fi
+            # git push origin HEAD:${GITHUB_HEAD_REF}
           fi
