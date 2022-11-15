@@ -56,6 +56,7 @@ jobs:
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
       - name: Commit report
+        if: github.ref == 'refs/heads/master'
         run: |
           if [[ $(git status -s) ]]; then
             git add -A
@@ -63,8 +64,10 @@ jobs:
             if [ -z "${GITHUB_HEAD_REF}" ]
             then
               echo "\${GITHUB_HEAD_REF} is empty"
+              git push
             else
               echo "\${GITHUB_HEAD_REF} is NOT empty"
+              echo "Skiiping push, will re-do when PR is merged."
+              #git push origin HEAD:${GITHUB_HEAD_REF}
             fi
-            # git push origin HEAD:${GITHUB_HEAD_REF}
           fi
