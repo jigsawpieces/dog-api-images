@@ -34,6 +34,28 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
+      - name: Display a list of uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
+
+      - name: Find uppercase 'JPG' or 'PNG' and rename to lowercase 'jpg' or 'png'
+        run: find . -depth -regex ".*\.\(JPG\|PNG\)" -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
+
+      - name: Display a list of uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
+
+      # Do we have any 'png' files? Convert to 'jpg'
+      - name: Fix 'png' files
+        run: find . -name "*.png" -exec mogrify -format jpg {} \;
+
+      # Delete 'png files'
+      - name: Delete 'png' files
+        run: find . -name "*.png" -delete;
+
+      - name: Rename jpeg to jpg
+        run: |
+          sudo apt install -y rename
+          find . -type f -name '*.jpeg' -print0 | xargs -0 rename 's/\.jpeg/\.jpg/'
+
       # Lossy jpeg optimization
       - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 70% {} \;
@@ -44,17 +66,9 @@ jobs:
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
 
+      # Replace spaces with '_' in filenames
       - name: Remove spaces from filenames
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
-
-      - name: Display a list of uppercase files
-        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
-
-      - name: Find uppercase 'JPG' and rename to lowercase 'jpg'
-        run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
-
-      - name: Display a list of uppercase files
-        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
       # Install jpegoptim, only on master
       - name: Install jpegoptim
