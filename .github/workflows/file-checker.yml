@@ -39,12 +39,13 @@ jobs:
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
-      # Get folder size down from 1.9Gb to 1.8Gb
+      # Lossless
       - name: Run through jpegoptim
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
+      # Lossy
       - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 70% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
       - name: List jpg/jpeg files that are too large
