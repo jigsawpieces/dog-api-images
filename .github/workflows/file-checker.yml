@@ -23,11 +23,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Switch to whatever branch we are on
-      - name: get current branch
+      - name: configure git
         run: |
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
           git config --global user.name "ElliottLandsborough"
+
+      # Switch to whatever branch we are on
+      - name: get current branch
+        run: |
           git config pull.rebase true
           git pull origin ${GITHUB_HEAD_REF}
 
@@ -54,8 +57,6 @@ jobs:
 
       - name: Commit report
         run: |
-          git config --global user.name 'ElliottLandsborough'
-          git config --global user.email '1583854+ElliottLandsborough@users.noreply.github.com'
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix bad files"
