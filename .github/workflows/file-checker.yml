@@ -57,7 +57,7 @@ jobs:
           find . -type f -name '*.jpeg' -print0 | xargs -0 rename 's/\.jpeg/\.jpg/'
 
       # Lossy jpeg optimization
-      - name: Bring resolution down to 1080 maximum on x or y, 80% qual on images over 500K big
+      - name: Bring resolution down to 1080 maximum on x and y, 80% qual on images over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 70% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
