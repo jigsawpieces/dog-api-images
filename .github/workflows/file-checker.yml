@@ -32,7 +32,10 @@ jobs:
       - name: Get the current branch
         run: |
           git config pull.rebase true
-          git pull origin ${GITHUB_HEAD_REF}
+          git branch
+          git fetch
+          git checkout $GITHUB_HEAD_REF
+          git branch
 
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
