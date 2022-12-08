@@ -23,10 +23,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      #- name: Configure git with username
-      #  run: |
-      #    git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
-      #    git config --global user.name "ElliottLandsborough"
+      - name: Configure git with username
+        run: |
+          git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
+          git config --global user.name "ElliottLandsborough"
 
       - name: Extract branch name
         shell: bash
@@ -87,7 +87,8 @@ jobs:
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
       # Push to repo
-      run: |
+      - name: Commit if new files exist
+        run: |
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Optimize images"
