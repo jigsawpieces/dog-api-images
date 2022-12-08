@@ -8,14 +8,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-permissions:
-  pull-requests: write
-  issues: read
-  repository-projects: read
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -92,28 +84,28 @@ jobs:
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
       # Push to repo
-      - name: Commit if new files exist
-        run: |
-          if [[ $(git status -s) ]]; then
-            git add -A
-            git commit -m "Optimize images"
-            git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
-          fi
-
-      # Push to repo, only on master
-      #- name: Commit report
-      #  if: github.ref == 'refs/heads/master'
+      #- name: Commit if new files exist
       #  run: |
       #    if [[ $(git status -s) ]]; then
       #      git add -A
       #      git commit -m "Optimize images"
-      #      if [ -z "${GITHUB_HEAD_REF}" ]
-      #      then
-      #        echo "\${GITHUB_HEAD_REF} is empty"
-      #        git push
-      #      else
-      #        echo "\${GITHUB_HEAD_REF} is NOT empty"
-      #        echo "Skiiping push, will re-do when PR is merged."
-      #        #git push origin HEAD:${GITHUB_HEAD_REF}
-      #      fi
+      #      git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
       #    fi
+
+      # Push to repo, only on master
+      - name: Commit report
+        if: github.ref == 'refs/heads/master'
+        run: |
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Optimize images"
+            if [ -z "${GITHUB_HEAD_REF}" ]
+            then
+              echo "\${GITHUB_HEAD_REF} is empty"
+              git push
+            else
+              echo "\${GITHUB_HEAD_REF} is NOT empty"
+              echo "Skiiping push, will re-do when PR is merged."
+              #git push origin HEAD:${GITHUB_HEAD_REF}
+            fi
+          fi
