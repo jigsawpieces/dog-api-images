@@ -8,9 +8,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -28,14 +25,15 @@ jobs:
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
           git config --global user.name "ElliottLandsborough"
 
-      # Switch to whatever branch we are on
-      - name: Get the current branch
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Check output of vars
         run: |
-          git config pull.rebase true
-          git branch
-          git fetch
-          git checkout $GITHUB_HEAD_REF
-          git branch
+          echo $GITHUB_HEAD_REF
+          echo ${{ steps.extract_branch.outputs.branch }}
 
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
@@ -84,6 +82,15 @@ jobs:
       - name: Run through jpegoptim
         if: github.ref == 'refs/heads/master'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
+
+      # Push to repo
+      #- name: Commit if new files exist
+      #  run: |
+      #    if [[ $(git status -s) ]]; then
+      #      git add -A
+      #      git commit -m "Optimize images"
+      #      git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
+      #    fi
 
       # Push to repo, only on master
       - name: Commit report
