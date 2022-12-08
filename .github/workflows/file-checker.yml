@@ -88,11 +88,6 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       # Push to repo
       - name: Commit if new files exist
         run: |
