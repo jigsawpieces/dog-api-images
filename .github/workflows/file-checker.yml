@@ -33,7 +33,7 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
-      - name: Check
+      - name: Check output of vars
         run: |
           echo $GITHUB_HEAD_REF
           echo ${{ steps.extract_branch.outputs.branch }}
@@ -44,7 +44,7 @@ jobs:
           git config pull.rebase true
           git branch
           git fetch
-          git checkout $GITHUB_HEAD_REF
+          git checkout ${{ steps.extract_branch.outputs.branch }}
           git branch
 
       - name: Display a list of uppercase files
