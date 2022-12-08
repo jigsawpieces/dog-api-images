@@ -88,13 +88,18 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       # Push to repo
       - name: Commit if new files exist
         run: |
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Optimize images"
-            git push
+            git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
           fi
 
       # Push to repo, only on master
