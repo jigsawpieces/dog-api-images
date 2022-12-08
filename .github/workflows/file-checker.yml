@@ -23,10 +23,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: Configure git with username
-        run: |
-          git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
-          git config --global user.name "ElliottLandsborough"
+      #- name: Configure git with username
+      #  run: |
+      #    git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
+      #    git config --global user.name "ElliottLandsborough"
 
       - name: Extract branch name
         shell: bash
@@ -37,15 +37,6 @@ jobs:
         run: |
           echo $GITHUB_HEAD_REF
           echo ${{ steps.extract_branch.outputs.branch }}
-
-      # Switch to whatever branch we are on
-      #- name: Get the current branch
-      #  run: |
-      #    git config pull.rebase true
-      #    git branch
-      #    git fetch
-      #    git checkout ${{ steps.extract_branch.outputs.branch }}
-      #    git branch
 
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
@@ -94,6 +85,14 @@ jobs:
       - name: Run through jpegoptim
         if: github.ref == 'refs/heads/master'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
+
+      # Push to repo
+      run: |
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Optimize images"
+            git push
+          fi
 
       # Push to repo, only on master
       #- name: Commit report
