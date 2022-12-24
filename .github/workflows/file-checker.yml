@@ -100,7 +100,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           CACHE_SECRET: ${{ secrets.CACHE_SECRET }}
-        run: curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
+        run: |
+          curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
 
       # Clear Cloudflare cache, only on main
       - name: Clear Symfony cache
