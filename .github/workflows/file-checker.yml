@@ -110,4 +110,5 @@ jobs:
           CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
           CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
           CLOUDFLARE_AUTH_KEY: ${{ secrets.CLOUDFLARE_AUTH_KEY }}
-        run: curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
