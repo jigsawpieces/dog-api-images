@@ -2,14 +2,11 @@ name: File size and name checks
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main", "hotfix/deploy" ]
   pull_request:
-    branches: [ "master" ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    branches: [ "master", "main", "hotfix/deploy"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -18,46 +15,100 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    environment: production
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Switch to whatever branch we are on
-      - name: get current branch
+      - name: Configure git with username
         run: |
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
           git config --global user.name "ElliottLandsborough"
-          git config pull.rebase true
-          git pull origin ${GITHUB_HEAD_REF}
 
-      - name: Bring resolution down to 1080x1080, 80% qual on jpg/jpeg files over 500K big
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 80% {} \;
+      - name: Display a list of uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
+
+      - name: Find uppercase 'JPG', 'JPEG' or 'PNG' and rename to lowercase equivalents
+        run: find . -depth -regex ".*\.\(JPG\|JPEG\|PNG\)" -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
+
+      - name: Display a list of uppercase files
+        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
+
+      # Do we have any 'png' files? Convert to 'jpg'
+      - name: Fix 'png' files
+        run: find . -name "*.png" -exec mogrify -format jpg {} \;
+
+      # Delete 'png files'
+      - name: Delete 'png' files
+        run: find . -name "*.png" -delete;
+
+      # Rename jpeg to jpg
+      - name: Rename 'jpeg' to 'jpg' after installing rename package
+        run: |
+          sudo apt install -y rename
+          find . -type f -name '*.jpeg' -print0 | xargs -0 rename 's/\.jpeg/\.jpg/'
+
+      # Replace spaces with '_' in filenames
+      - name: Replace spaces with '_' in filenames
+        run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
+
+      # At this point, if anything was changed, commit if we are on main
+      - name: Commit any changed files to main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Fix file names"
+            git push origin main
+          fi
+
+      # Lossy jpeg optimization
+      - name: Bring resolution down to 1080 maximum on x and y, 80% qual on images over 500K big
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 70% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
-      - name: List jpg/jpeg files that are too large
+      - name: List images that are too large
         run: |
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
 
-      - name: Remove spaces from filenames
-        run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
-
-      - name: Display a list of uppercase files
-        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
-
-      - name: Find uppercase 'JPG' and rename to lowercase 'jpg'
-        run: find . -depth -name '*.JPG' -type f -exec bash -c 'base=${0%.*} ext=${0##*.} a=${base,,}.${ext,,}; [ "$a" != "$0" ] && mv -- "$0" "$a"' {} \;
-
-      - name: Display a list of uppercase files
-        run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
-
-      - name: Commit report
+      # Install jpegoptim, only on main
+      - name: Install jpegoptim
+        if: github.ref == 'refs/heads/main'
         run: |
-          git config --global user.name 'ElliottLandsborough'
-          git config --global user.email '1583854+ElliottLandsborough@users.noreply.github.com'
-          if [[ $(git status -s) ]]; then
-            git add -A
-            git commit -m "Fix bad files"
-            git push origin HEAD:${GITHUB_HEAD_REF}
-          fi
+          sudo apt update
+          sudo apt install -y jpegoptim
+
+      # Lossless jpeg optimization, only on main
+      - name: Run through jpegoptim
+        if: github.ref == 'refs/heads/main'
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
+
+      # Copy to s3, only on main
+      - name: Copy files to s3
+        if: github.ref == 'refs/heads/main'
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: aws s3 sync --dryrun --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
+
+      # Clear Symfony cache, only on main
+      - name: Clear Symfony cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CACHE_SECRET: ${{ secrets.CACHE_SECRET }}
+        run: |
+          curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
+
+      # Clear Cloudflare cache, only on main
+      - name: Clear Symfony cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_AUTH_KEY: ${{ secrets.CLOUDFLARE_AUTH_KEY }}
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
