@@ -86,14 +86,25 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
-      # Copy to s3, only on main
-      - name: Copy files to s3
+      # Sync to S3, only on main
+      - name: Sync files to S3
         if: github.ref == 'refs/heads/main'
         env:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: aws s3 sync --dryrun --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
+
+      # Sync to R2, only on main
+      - name: Sync files to R2
+        if: github.ref == 'refs/heads/main'
+        env:
+          R2_API: ${{ secrets.R2_API }}
+          R2_USERID: ${{ secrets.R2_USERID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: aws s3 sync --dryrun --region 'us-east-1' --endpoint-url $R2_API --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$R2_BUCKET
 
       # Clear Symfony cache, only on main
       - name: Clear Symfony cache
