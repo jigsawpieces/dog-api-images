@@ -100,6 +100,11 @@ jobs:
       #        #git push origin HEAD:${GITHUB_HEAD_REF}
       #      fi
       #    fi
+      - name: echo bucket name
+        env:
+          s3-bucket: ${{ secrets.S3_BUCKET }}
+        run: echo ${s3-bucket}
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -109,8 +114,8 @@ jobs:
 
       - name: Copy files to s3
         env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET
+          s3-bucket: ${{ secrets.S3_BUCKET }}
+        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://${s3-bucket}
 
 #curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
 #curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"f>
