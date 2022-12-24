@@ -94,7 +94,7 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: echo "aws s3 ls s3://$S3_BUCKET"
+        run: aws s3 ls s3://$S3_BUCKET
 
       - name: Copy files to s3
         env:
