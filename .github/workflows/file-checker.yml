@@ -111,13 +111,13 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-1
+          aws-access-key-id: $AWS_ACCESS_KEY_ID
+          aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
+          aws-region: us-east-1
 
       - name: Copy files to s3
         run:
-          aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://S3_BUCKET
+          aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET
 
-#curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: CACHE_SECRET'
-#curl -X POST "https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: CLOUDFLARE_EMAIL" -H "X-Auth-Key: CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"f>
+#curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
+#curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"f>
