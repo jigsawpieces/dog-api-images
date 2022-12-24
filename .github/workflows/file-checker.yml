@@ -87,7 +87,7 @@ jobs:
       - name: echo bucket name
         env:
           s3-bucket: ${{ secrets.S3_BUCKET }}
-        run: echo "aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$env:S3_BUCKET"
+        run: echo "aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -99,4 +99,4 @@ jobs:
       - name: Copy files to s3
         env:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$env:S3_BUCKET
+        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET
