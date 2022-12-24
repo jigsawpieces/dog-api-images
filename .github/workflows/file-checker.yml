@@ -17,6 +17,14 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Env vars
+      env:
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        #AWS_REGION: 'us-east-1' # optional: defaults to us-east-1
+        #SOURCE_DIR: 'public'    # optional: defaults to entire repository
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
@@ -100,16 +108,16 @@ jobs:
               #git push origin HEAD:${GITHUB_HEAD_REF}
             fi
           fi
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
 
-      # Install s3cmd
-      - name: Install s3cmd
-        if: github.ref == 'refs/heads/master'
-        run: |
-          wget https://github.com/s3tools/s3cmd/releases/download/v2.4.0/s3cmd-2.4.0.tar.gz
-          tar xzf s3cmd-2.4.0.tar.gz
-          rm s3cmd-2.4.0.tar.gz
-          cd s3cmd-2.4.0
-          sudo python setup.py install
-          cd ../
-          mv s3cmd /usr/bin/
-          s3cmd ls
+      - name: Copy files to s3
+        run:
+          aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://S3_BUCKET
+
+#curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: CACHE_SECRET'
+#curl -X POST "https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: CLOUDFLARE_EMAIL" -H "X-Auth-Key: CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"f>
