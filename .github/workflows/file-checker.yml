@@ -25,16 +25,6 @@ jobs:
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
           git config --global user.name "ElliottLandsborough"
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - name: Check output of vars
-        run: |
-          echo $GITHUB_HEAD_REF
-          echo ${{ steps.extract_branch.outputs.branch }}
-
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
 
@@ -69,15 +59,7 @@ jobs:
           if [[ $(git status -s) ]]; then
             git add -A
             git commit -m "Fix file names"
-            if [ -z "${GITHUB_HEAD_REF}" ]
-            then
-              echo "\${GITHUB_HEAD_REF} is empty"
-              git push
-            else
-              echo "\${GITHUB_HEAD_REF} is NOT empty"
-              echo "Skiping push. It will happen when PR is merged to main."
-              #git push origin HEAD:${GITHUB_HEAD_REF}
-            fi
+            git push origin main
           fi
 
       # Lossy jpeg optimization
@@ -105,7 +87,7 @@ jobs:
       - name: echo bucket name
         env:
           s3-bucket: ${{ secrets.S3_BUCKET }}
-        run: echo ${s3-bucket}
+        run: echo "aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$env:S3_BUCKET"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -116,5 +98,5 @@ jobs:
 
       - name: Copy files to s3
         env:
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://${s3-bucket}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$env:S3_BUCKET
