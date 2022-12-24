@@ -4,9 +4,9 @@ name: File size and name checks
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main", "hotfix/deploy" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "main", "hotfix/deploy"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
