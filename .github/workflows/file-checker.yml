@@ -53,7 +53,7 @@ jobs:
         run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
 
       # At this point, if anything was changed, commit if we are on main
-      - name: Commit report
+      - name: Commit any changed files to main
         if: github.ref == 'refs/heads/main'
         run: |
           if [[ $(git status -s) ]]; then
@@ -84,19 +84,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
-      - name: echo bucket name
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        run: echo "aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET"
-
-      - name: echo bucket name
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: aws s3 ls s3://$S3_BUCKET --region us-east-1
-
       - name: Copy files to s3
         env:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        run: aws s3 sync --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://$S3_BUCKET
+        run: aws s3 sync --dryrun --region 'us-east-1' --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET"
+
