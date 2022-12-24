@@ -86,10 +86,27 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
+      # Copy to s3, only on main
       - name: Copy files to s3
+        if: github.ref == 'refs/heads/main'
         env:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: aws s3 sync --dryrun --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
+
+      - name: Clear symfony cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CACHE_SECRET: ${{ secrets.CACHE_SECRET }}
+        run: curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
+
+      - name: Clear Cloudflare cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_AUTH_KEY: ${{ secrets.CLOUDFLARE_AUTH_KEY }}
+        run: curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
+
 
