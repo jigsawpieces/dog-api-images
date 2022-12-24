@@ -2,11 +2,11 @@ name: File size and name checks
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main", "hotfix/deploy" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "main", "hotfix/deploy"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -14,6 +14,8 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    environment: production
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -24,16 +26,6 @@ jobs:
         run: |
           git config --global user.email "1583854+ElliottLandsborough@users.noreply.github.com"
           git config --global user.name "ElliottLandsborough"
-
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      - name: Check output of vars
-        run: |
-          echo $GITHUB_HEAD_REF
-          echo ${{ steps.extract_branch.outputs.branch }}
 
       - name: Display a list of uppercase files
         run: find . -name "*.*[A-Z]*" ! -name "*.*[^A-Z]*"
@@ -52,10 +44,25 @@ jobs:
       - name: Delete 'png' files
         run: find . -name "*.png" -delete;
 
+      # Rename jpeg to jpg
       - name: Rename 'jpeg' to 'jpg' after installing rename package
         run: |
           sudo apt install -y rename
           find . -type f -name '*.jpeg' -print0 | xargs -0 rename 's/\.jpeg/\.jpg/'
+
+      # Replace spaces with '_' in filenames
+      - name: Replace spaces with '_' in filenames
+        run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
+
+      # At this point, if anything was changed, commit if we are on main
+      - name: Commit any changed files to main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [[ $(git status -s) ]]; then
+            git add -A
+            git commit -m "Fix file names"
+            git push origin main
+          fi
 
       # Lossy jpeg optimization
       - name: Bring resolution down to 1080 maximum on x and y, 80% qual on images over 500K big
@@ -67,45 +74,41 @@ jobs:
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k
          find . -regex ".*\.\(jpg\|jpeg\)" -type f -size +500k -exec false {} +
 
-      # Replace spaces with '_' in filenames
-      - name: Replace spaces with '_' in filenames
-        run: find . -type f -name "* *" | while read file; do mv "$file" ${file// /_}; done
-
-      # Install jpegoptim, only on master
+      # Install jpegoptim, only on main
       - name: Install jpegoptim
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           sudo apt update
           sudo apt install -y jpegoptim
 
-      # Lossless jpeg optimization, only on master
+      # Lossless jpeg optimization, only on main
       - name: Run through jpegoptim
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim -t --all-progressive --strip-all {} \;
 
-      # Push to repo
-      #- name: Commit if new files exist
-      #  run: |
-      #    if [[ $(git status -s) ]]; then
-      #      git add -A
-      #      git commit -m "Optimize images"
-      #      git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
-      #    fi
+      # Copy to s3, only on main
+      - name: Copy files to s3
+        if: github.ref == 'refs/heads/main'
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: aws s3 sync --dryrun --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
 
-      # Push to repo, only on master
-      - name: Commit report
-        if: github.ref == 'refs/heads/master'
+      # Clear Symfony cache, only on main
+      - name: Clear Symfony cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CACHE_SECRET: ${{ secrets.CACHE_SECRET }}
         run: |
-          if [[ $(git status -s) ]]; then
-            git add -A
-            git commit -m "Optimize images"
-            if [ -z "${GITHUB_HEAD_REF}" ]
-            then
-              echo "\${GITHUB_HEAD_REF} is empty"
-              git push
-            else
-              echo "\${GITHUB_HEAD_REF} is NOT empty"
-              echo "Skiiping push, will re-do when PR is merged."
-              #git push origin HEAD:${GITHUB_HEAD_REF}
-            fi
-          fi
+          curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
+
+      # Clear Cloudflare cache, only on main
+      - name: Clear Symfony cache
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_AUTH_KEY: ${{ secrets.CLOUDFLARE_AUTH_KEY }}
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
