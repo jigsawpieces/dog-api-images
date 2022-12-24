@@ -116,6 +116,3 @@ jobs:
         env:
           s3-bucket: ${{ secrets.S3_BUCKET }}
         run: aws s3 sync --delete-removed --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' ./ s3://${s3-bucket}
-
-#curl -X GET https://dog.ceo/api/cache-clear -H 'auth-key: $CACHE_SECRET'
-#curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE/purge_cache" -H "X-Auth-Email: $CLOUDFLARE_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_AUTH_KEY" -H "Content-Type: application/json" --data '{"files":["https://dog.ceo/api/breeds/list/all","https://dog.ceo/api/breeds/list","https://dog.ceo/api/breed/*/list","https://dog.ceo/api/breed/*/images","https://dog.ceo/api/breed/*/*/images","https://dog.ceo/api/breed/*","https://dog.ceo/api/breed/*/*","https://dog.ceo/api/breed/*/images/alt","https://dog.ceo/api/breed/*/*/images/alt"]}'
