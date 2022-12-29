@@ -104,7 +104,9 @@ jobs:
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        run: aws s3 sync --region 'us-east-1' --endpoint-url $R2_API --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$R2_BUCKET
+        #run: aws s3 sync --region 'us-east-1' --endpoint-url $R2_API --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$R2_BUCKET/breeds
+        # Delete all files in r2
+        run: aws s3 rm --recursive --region 'us-east-1' --endpoint-url $R2_API --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$R2_BUCKET
 
       # Clear Symfony cache, only on main
       - name: Clear Symfony cache
