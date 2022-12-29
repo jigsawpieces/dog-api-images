@@ -84,7 +84,7 @@ jobs:
       # Lossless jpeg optimization, only on main
       - name: Run through jpegoptim
         if: github.ref == 'refs/heads/main'
-        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim --totals --preserve --all-progressive --strip-all {} \;
+        run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -exec jpegoptim --quiet --preserve --all-progressive --strip-all {} \;
 
       # Sync to S3, only on main
       - name: Sync files to S3
