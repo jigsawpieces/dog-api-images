@@ -65,7 +65,7 @@ jobs:
           fi
 
       # Lossy jpeg optimization
-      - name: Bring resolution down to 1080 maximum on x and y, 80% qual on images over 500K big
+      - name: Bring resolution down to 1080 maximum on x and y, 70% qual on images over 500K big
         run: find . -type f -regex ".*\.\(jpg\|jpeg\)" -size +500k -exec convert {} -resize 1080x1080 -quality 70% {} \;
 
       # Twice, once to actually output the list, second time to output non zero and break CI
@@ -93,7 +93,7 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: aws s3 sync --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
+        run: aws s3 sync --only-show-errors --region 'us-east-1' --delete --exclude '.git*' --exclude 'LICENSE' --exclude '*.md' --include '*.jp*g' . s3://$S3_BUCKET
 
       # Sync to R2, only on main
       - name: Sync files to R2
