@@ -11,6 +11,7 @@ All images you submit will be made available via the [Dog API endpoints](https:/
 - We will only accept JPG images which are smaller than 300kb
 - Please ensure your photos are of a good quality and the dog is easily identifiable in the photo
 - Please ensure your photo features one dog only (although additional dogs can be in the background)
+- Photos must not represent any human, even human body parts; it's illegal in most states of the world
 - If your dog breed does not exist in our collection you can suggest breeds for us to include by creating a new directory for it
 - We love mixed breeds too! They can be included under [/mix](https://github.com/jigsawpieces/dog-api-images/tree/master/mix)
 
